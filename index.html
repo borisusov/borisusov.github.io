@@ -1,14 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-  <h1>Hello World</h1>
-  <p>Boris Usov</p>
-  <p>System engineer</p>
-  <p>I'm hosted with GitHub Pages.</p>
-</body>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Статичний сайт DevOps-інженера, задеплоєний на Amazon S3. Тестове завдання: IaC, CI/CD, immutable static hosting."
+    />
+    <title>Boris Usov · DevOps Engineer</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="top">
+      <a class="brand" href="#top">
+        <span class="brand-mark">BU</span>
+        <span>
+          <strong>Boris Usov</strong>
+          <small>DevOps / Platform</small>
+        </span>
+      </a>
+      <nav>
+        <a href="#stack">Стек</a>
+        <a href="#work">Роботи</a>
+        <a href="#infra">Інфра</a>
+        <a href="#contact">Контакт</a>
+      </nav>
+      <span class="live" title="Static origin: Amazon S3">
+        <i></i> s3 · static · live
+      </span>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="kicker">
+          <span class="prompt">usov@s3</span>
+          <span class="cmd">~/site deploy --region eu-central-1</span>
+        </p>
+        <h1>
+          Статичний сайт
+          <em>DevOps-інженера</em>
+          як тест на S3.
+        </h1>
+        <p class="lead">
+          Без серверів, без рантайму, без сюрпризів. HTML/CSS/JS у бакеті,
+          публічний website endpoint, інфраструктура описана в Terraform.
+          Це не лендінг «про себе» — це демонстрація, як я виконую тестове
+          завдання: швидко, відтворювано, з інструкцією для деплою.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="#infra">Як це задеплоїти</a>
+          <a class="btn ghost" href="#work">Що всередині</a>
+        </div>
+        <dl class="stats">
+          <div>
+            <dt>Origin</dt>
+            <dd>Amazon S3</dd>
+          </div>
+          <div>
+            <dt>Compute</dt>
+            <dd>0</dd>
+          </div>
+          <div>
+            <dt>TTL</dt>
+            <dd>immutable</dd>
+          </div>
+          <div>
+            <dt>IaC</dt>
+            <dd>Terraform</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="stack">
+        <div class="section-head">
+          <h2>Робочий стек</h2>
+          <p>Те, чим зазвичай закриваю тестові та продакшн-завдання.</p>
+        </div>
+        <ul class="grid cards">
+          <li>
+            <h3>Cloud</h3>
+            <p>AWS (S3, CloudFront, IAM, VPC, ECS/EKS), GCP basics, cost-aware дизайни.</p>
+          </li>
+          <li>
+            <h3>IaC</h3>
+            <p>Terraform модулі, remote state, plan у CI, без ручних кліків у консолі.</p>
+          </li>
+          <li>
+            <h3>CI/CD</h3>
+            <p>GitHub Actions / GitLab CI: lint, test, artifact, sync на S3, smoke-check URL.</p>
+          </li>
+          <li>
+            <h3>Containers</h3>
+            <p>Docker, Kubernetes, Helm. Статика тут навмисно без контейнерів — менше рухомих частин.</p>
+          </li>
+          <li>
+            <h3>Observability</h3>
+            <p>Логи доступу S3, метрики 4xx/5xx, алерти на broken deploy, health на index.html.</p>
+          </li>
+          <li>
+            <h3>Security</h3>
+            <p>Least-privilege IAM, bucket policy лише на GetObject, блокування public ACL, HTTPS через CloudFront (опційно).</p>
+          </li>
+        </ul>
+      </section>
+
+      <section id="work">
+        <div class="section-head">
+          <h2>Що робить цей репозиторій</h2>
+          <p>Мінімальний, але повний контур для тестового S3-сайту.</p>
+        </div>
+        <ol class="steps">
+          <li>
+            <span>01</span>
+            <div>
+              <h3>Статика в <code>site/</code></h3>
+              <p>Один index, error-сторінка, CSS, легкий JS. Жодних білдерів — <code>aws s3 sync</code> достатньо.</p>
+            </div>
+          </li>
+          <li>
+            <span>02</span>
+            <div>
+              <h3>Terraform у <code>infra/</code></h3>
+              <p>Бакет, website hosting, public GetObject, outputs з URL. Ідемпотентний apply.</p>
+            </div>
+          </li>
+          <li>
+            <span>03</span>
+            <div>
+              <h3>Скрипт <code>scripts/deploy.sh</code></h3>
+              <p>Apply + sync + інвалідація cache (якщо є CloudFront). Один вхід для людини і для CI.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="infra" class="panel">
+        <div class="section-head">
+          <h2>Архітектура деплою</h2>
+          <p>Прямий S3 website endpoint. CloudFront можна додати другим кроком.</p>
+        </div>
+        <pre class="arch" aria-label="Архітектура"><code>Git  →  scripts/deploy.sh
+          ├─ terraform apply   →  S3 bucket (website)
+          └─ aws s3 sync site/ →  index.html + assets
+                                  └─ http://&lt;bucket&gt;.s3-website.&lt;region&gt;.amazonaws.com</code></pre>
+        <div class="callout">
+          <strong>Деплой локально</strong>
+          <ol>
+            <li>Експортуй <code>AWS_PROFILE</code> / ключі з правами на S3 і IAM.</li>
+            <li><code>cd infra && terraform init && terraform apply</code></li>
+            <li><code>./scripts/deploy.sh</code> — заливає <code>site/</code> у бакет.</li>
+          </ol>
+          <p>Деталі — у <code>README.md</code> кореня репозиторію.</p>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="section-head">
+          <h2>Готово до рев’ю</h2>
+          <p>
+            Це тестова сторінка. Після деплою URL з Terraform output можна
+            віддати як доказ, що пайплайн живий.
+          </p>
+        </div>
+        <p class="foot-note">
+          Boris Usov · Operations / DevOps test · статичний хостинг на Amazon S3
+        </p>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
 </html>
